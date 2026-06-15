@@ -1,0 +1,6 @@
+@MasterFloorAPI_HostAddress = http://localhost:5150
+
+GET {{MasterFloorAPI_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
