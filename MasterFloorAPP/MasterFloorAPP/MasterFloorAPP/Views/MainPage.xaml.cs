@@ -1,4 +1,4 @@
-﻿using MasterFloorAPP.ViewModels;
+using MasterFloorAPP.ViewModels;
 
 namespace MasterFloorAPP;
 
@@ -8,5 +8,11 @@ public partial class MainPage : ContentPage
     {
         InitializeComponent();
         BindingContext = new MainPageViewModel();
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        (BindingContext as MainPageViewModel)?.LoadPartnersCommand?.Execute(null);
     }
 }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace MasterFloorAPI;
+namespace MasterFloorAPI.Models;
 
 public partial class PartnerRatingHistory
 {

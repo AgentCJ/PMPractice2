@@ -4,11 +4,12 @@ public class Partner
 {
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
-    public string PartnerType { get; set; } = string.Empty;
-    public string DirectorFullName { get; set; } = string.Empty;
-    public string Phone { get; set; } = string.Empty;
+    public int TypeId { get; set; }
+    public string? DirectorLastName { get; set; }
+    public string? DirectorFirstName { get; set; }
+    public string? DirectorMiddleName { get; set; }
+    public string? Email { get; set; }
+    public string? Phone { get; set; }
     public int? Rating { get; set; }
-    public string Address { get; set; } = string.Empty;
-    public long TotalSalesQuantity { get; set; }
-    public int DiscountPercent { get; set; }
+    public Address? LegalAddress { get; set; }
 }

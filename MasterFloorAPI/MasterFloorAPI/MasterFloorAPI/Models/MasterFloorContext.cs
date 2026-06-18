@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace MasterFloorAPI;
+namespace MasterFloorAPI.Models;
 
 public partial class MasterFloorContext : DbContext
 {
