@@ -149,7 +149,7 @@ namespace MasterFloorAPP.ViewModels
                 if (success)
                 {
                     await Application.Current.MainPage.DisplayAlert("Успешно", "Сохранено", "OK");
-                    await Shell.Current.GoToAsync("//MainPage");
+                    await Shell.Current.GoToAsync("..");
                 }
                 else
                 {

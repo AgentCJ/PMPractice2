@@ -9,11 +9,11 @@
             <Button Text="Добавить партнёра" 
                     Command="{Binding AddPartnerCommand}"
                     Margin="10,10,10,5"
-                    BackgroundColor="#2196F3"
+                    BackgroundColor="#67BA80"
                     TextColor="White"
-                    FontAttributes="Bold"/>
-
-            <Label Text="Список партнёров" FontSize="25" FontAttributes="Bold" Margin="5,10"/>
+                    FontAttributes="Bold"
+                    HorizontalOptions="End"
+                    VerticalOptions="End"/>
 
             <CollectionView ItemsSource="{Binding Partners}">
                 <CollectionView.ItemTemplate>
@@ -50,6 +50,7 @@
                                         <Label Text="{Binding Rating}" FontSize="14" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
+<<<<<<< HEAD
                                 <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Start">
                                     <Button Text="Редактировать" 
                 Command="{Binding Source={x:Reference mainPage}, Path=BindingContext.EditCommand}"
@@ -70,6 +71,20 @@
                 HeightRequest="40"
                 CornerRadius="20" />
                                 </VerticalStackLayout>
+=======
+                                <Button Grid.Column="1" 
+                                        Text="Редактировать" 
+                                        Command="{Binding Source={x:Reference mainPage}, Path=BindingContext.EditCommand}"
+                                        CommandParameter="{Binding .}"
+                                        BackgroundColor="#67BA80"
+                                        TextColor="White"
+                                        FontSize="12"
+                                        WidthRequest="120"
+                                        HeightRequest="40"
+                                        CornerRadius="20"
+                                        VerticalOptions="Start"
+                                        Margin="0,0,0,0"/>
+>>>>>>> ca9abd8f2329556eb9a8ac67c6ffd9b0d0d912cf
                             </Grid>
                         </Border>
                     </DataTemplate>
