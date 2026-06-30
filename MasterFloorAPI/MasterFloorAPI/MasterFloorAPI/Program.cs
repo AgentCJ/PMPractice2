@@ -1,4 +1,5 @@
 using MasterFloorAPI.Models;
+using MasterFloorAPI.Services;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
@@ -6,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<MasterFloorContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IMaterialCalculator, MaterialCalculator>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

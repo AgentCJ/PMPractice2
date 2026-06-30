@@ -50,18 +50,26 @@
                                         <Label Text="{Binding Rating}" FontSize="14" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
                                 </VerticalStackLayout>
-                                <Button Grid.Column="1" 
-                                        Text="Редактировать" 
-                                        Command="{Binding Source={x:Reference mainPage}, Path=BindingContext.EditCommand}"
-                                        CommandParameter="{Binding .}"
-                                        BackgroundColor="#4CAF50"
-                                        TextColor="White"
-                                        FontSize="12"
-                                        WidthRequest="120"
-                                        HeightRequest="40"
-                                        CornerRadius="20"
-                                        VerticalOptions="Start"
-                                        Margin="0,0,0,0"/>
+                                <VerticalStackLayout Grid.Column="1" Spacing="5" VerticalOptions="Start">
+                                    <Button Text="Редактировать" 
+                Command="{Binding Source={x:Reference mainPage}, Path=BindingContext.EditCommand}"
+                CommandParameter="{Binding .}"
+                BackgroundColor="#4CAF50"
+                TextColor="White"
+                FontSize="12"
+                WidthRequest="120"
+                HeightRequest="40"
+                CornerRadius="20" />
+                                    <Button Text="История" 
+                Command="{Binding Source={x:Reference mainPage}, Path=BindingContext.SalesHistoryCommand}"
+                CommandParameter="{Binding .}"
+                BackgroundColor="#FF9800"
+                TextColor="White"
+                FontSize="12"
+                WidthRequest="120"
+                HeightRequest="40"
+                CornerRadius="20" />
+                                </VerticalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>

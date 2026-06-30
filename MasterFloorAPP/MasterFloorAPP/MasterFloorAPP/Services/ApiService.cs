@@ -32,31 +32,25 @@ public class ApiService
 
     public async Task<bool> CreatePartnerAsync(Partner partner)
     {
-        try
-        {
-            var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/api/partners", partner);
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка создания: {ex.Message}");
-            return false;
-        }
+        var response = await _httpClient.PostAsJsonAsync($"{BaseUrl}/api/partners", partner);
+        if (response.IsSuccessStatusCode)
+            return true;
+        var error = await response.Content.ReadAsStringAsync();
+        throw new Exception($"Ошибка создания ({(int)response.StatusCode}): {error}");
     }
+
+
 
     public async Task<bool> UpdatePartnerAsync(int id, Partner partner)
     {
-        try
-        {
-            var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/api/partners/{id}", partner);
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка обновления: {ex.Message}");
-            return false;
-        }
+        var response = await _httpClient.PutAsJsonAsync($"{BaseUrl}/api/partners/{id}", partner);
+        if (response.IsSuccessStatusCode)
+            return true;
+        var error = await response.Content.ReadAsStringAsync();
+        throw new Exception($"Ошибка обновления ({(int)response.StatusCode}): {error}");
     }
+
+
 
     public async Task<Partner?> GetPartnerDetailAsync(int id)
     {
@@ -76,20 +70,20 @@ public class ApiService
 
     public async Task<List<PartnerType>?> GetPartnerTypesAsync()
     {
-        try
-        {
-            // Правильный путь — /api/partners/types
-            var response = await _httpClient.GetAsync($"{BaseUrl}/api/partners/types");
-            if (response.IsSuccessStatusCode)
-                return await response.Content.ReadFromJsonAsync<List<PartnerType>>();
-            return null;
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Ошибка получения типов: {ex.Message}");
-            return null;
-        }
+        var response = await _httpClient.GetAsync($"{BaseUrl}/api/partners/types");
+        if (response.IsSuccessStatusCode)
+            return await response.Content.ReadFromJsonAsync<List<PartnerType>>();
+        var error = await response.Content.ReadAsStringAsync();
+        throw new Exception($"Ошибка получения типов ({(int)response.StatusCode}): {error}");
     }
 
+    public async Task<List<SaleHistoryItem>?> GetPartnerSalesAsync(int partnerId)
+    {
+        var response = await _httpClient.GetAsync($"{BaseUrl}/api/partners/{partnerId}/sales");
+        if (response.IsSuccessStatusCode)
+            return await response.Content.ReadFromJsonAsync<List<SaleHistoryItem>>();
+        var error = await response.Content.ReadAsStringAsync();
+        throw new Exception($"Ошибка получения истории ({(int)response.StatusCode}): {error}");
+    }
 
 }

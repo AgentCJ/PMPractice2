@@ -64,6 +64,7 @@ namespace MasterFloorAPP.ViewModels
             _partnerId = partnerId;
             SaveCommand = new Command(async () => await SaveAsync());
             CancelCommand = new Command(async () => await GoBackAsync());
+            // Загружаем данные асинхронно
             LoadData();
         }
 
@@ -72,22 +73,21 @@ namespace MasterFloorAPP.ViewModels
             IsLoading = true;
             try
             {
+                // Загружаем типы
                 var types = await _apiService.GetPartnerTypesAsync();
-                if (types != null)
+                if (types != null && types.Any())
                 {
                     PartnerTypes.Clear();
                     foreach (var t in types)
-                    {
                         PartnerTypes.Add(t);
-                        Console.WriteLine($"Добавлен тип: Id={t.Id}, Name={t.Name}");
-                    }
-                    Console.WriteLine($"Всего типов: {PartnerTypes.Count}");
+                    Console.WriteLine($"Загружено типов: {PartnerTypes.Count}");
                 }
                 else
                 {
-                    Console.WriteLine("GetPartnerTypesAsync вернул null");
+                    await Application.Current.MainPage.DisplayAlert("Предупреждение", "Типы не найдены", "OK");
                 }
 
+                // Загружаем данные партнёра (если редактирование)
                 if (_partnerId.HasValue)
                 {
                     Title = "Редактирование партнёра";
@@ -95,7 +95,7 @@ namespace MasterFloorAPP.ViewModels
                     if (loaded != null)
                     {
                         Partner = loaded;
-                        // После загрузки партнёра и наличия списка типов устанавливаем выбранный тип
+                        // Устанавливаем выбранный тип
                         SelectedPartnerType = PartnerTypes.FirstOrDefault(t => t.Id == Partner.TypeId);
                     }
                     else
@@ -111,7 +111,7 @@ namespace MasterFloorAPP.ViewModels
             }
             catch (Exception ex)
             {
-                await Application.Current.MainPage.DisplayAlert("Ошибка", ex.Message, "OK");
+                await Application.Current.MainPage.DisplayAlert("Ошибка загрузки", ex.Message, "OK");
             }
             finally
             {
@@ -119,9 +119,9 @@ namespace MasterFloorAPP.ViewModels
             }
         }
 
-
         private async Task SaveAsync()
         {
+            // Валидация
             if (Partner.Rating.HasValue && Partner.Rating.Value < 0)
             {
                 await Application.Current.MainPage.DisplayAlert("Ошибка", "Рейтинг должен быть >= 0", "OK");
@@ -134,7 +134,8 @@ namespace MasterFloorAPP.ViewModels
                 return;
             }
 
-            if (Partner.LegalAddress == null) Partner.LegalAddress = new Address();
+            if (Partner.LegalAddress == null)
+                Partner.LegalAddress = new Address();
 
             IsLoading = true;
             try

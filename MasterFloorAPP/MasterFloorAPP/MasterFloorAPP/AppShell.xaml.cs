@@ -6,7 +6,7 @@
         {
             InitializeComponent();
             Routing.RegisterRoute(nameof(AddEditPartnerPage), typeof(AddEditPartnerPage));
-
+            Routing.RegisterRoute(nameof(PartnerSalesPage), typeof(PartnerSalesPage));
         }
     }
 }

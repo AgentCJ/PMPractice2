@@ -32,6 +32,8 @@ namespace MasterFloorAPP.ViewModels
         public ICommand LoadPartnersCommand { get; }
         public ICommand AddPartnerCommand { get; }
         public ICommand EditCommand { get; }
+        public ICommand SalesHistoryCommand { get; }
+
 
         public MainPageViewModel()
         {
@@ -39,6 +41,11 @@ namespace MasterFloorAPP.ViewModels
 
             LoadPartnersCommand = new Command(async () => await LoadPartnersAsync());
             AddPartnerCommand = new Command(async () => await Shell.Current.GoToAsync(nameof(AddEditPartnerPage)));
+            SalesHistoryCommand = new Command<PartnerListItem>(async (partner) =>
+            {
+                if (partner != null)
+                    await Shell.Current.GoToAsync($"{nameof(PartnerSalesPage)}?partnerId={partner.Id}&partnerName={Uri.EscapeDataString(partner.Name)}");
+            });
             EditCommand = new Command<PartnerListItem>(async (partner) =>
             {
                 if (partner != null)

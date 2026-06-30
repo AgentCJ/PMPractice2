@@ -15,6 +15,7 @@ namespace MasterFloorAPP
                 int? id = null;
                 if (!string.IsNullOrEmpty(value) && int.TryParse(value, out int parsed))
                     id = parsed;
+                // Пересоздаём ViewModel с новым параметром
                 BindingContext = new AddEditPartnerViewModel(id);
             }
         }
@@ -22,6 +23,9 @@ namespace MasterFloorAPP
         public AddEditPartnerPage()
         {
             InitializeComponent();
+            // Если PartnerId не установлен (например, при навигации без параметра), создаём для добавления
+            if (string.IsNullOrEmpty(PartnerId))
+                BindingContext = new AddEditPartnerViewModel(null);
         }
     }
 }

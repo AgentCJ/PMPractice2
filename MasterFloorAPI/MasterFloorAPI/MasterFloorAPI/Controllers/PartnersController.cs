@@ -1,7 +1,6 @@
 ﻿using MasterFloorAPI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json.Serialization;
 
 namespace MasterFloorAPI.Controllers;
 
@@ -67,9 +66,10 @@ public class PartnersController : ControllerBase
         if (partner == null)
             return NotFound($"Партнёр с Id = {id} не найден.");
 
-        // Возвращаем полный объект Partner (с вложенным Address)
         return Ok(partner);
     }
+
+    // GET: api/partners/types
     [HttpGet("types")]
     public async Task<IActionResult> GetPartnerTypes()
     {
@@ -79,43 +79,62 @@ public class PartnersController : ControllerBase
 
     // POST: api/partners
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] Partner partner)
+    public async Task<IActionResult> Create([FromBody] PartnerCreateUpdateDto dto)
     {
         try
         {
-            // Валидация рейтинга
-            if (partner.Rating.HasValue && partner.Rating.Value < 0)
+            // Валидация
+            if (dto.Rating.HasValue && dto.Rating.Value < 0)
                 return BadRequest("Рейтинг не может быть отрицательным.");
 
-            // Проверка наличия адреса
-            if (partner.LegalAddress == null)
+            if (dto.LegalAddress == null)
                 return BadRequest("Адрес обязателен.");
 
-            // Создаём новый адрес (Id не задаём, он сгенерируется БД)
+            // Проверим, существует ли тип
+            var typeExists = await _context.PartnerTypes.AnyAsync(t => t.Id == dto.TypeId);
+            if (!typeExists)
+                return BadRequest($"Тип с Id = {dto.TypeId} не существует.");
+
+            // Генерация следующего Id для адреса (ручное присвоение)
+            int nextAddressId = await _context.Addresses
+                .OrderByDescending(a => a.Id)
+                .Select(a => a.Id)
+                .FirstOrDefaultAsync() + 1;
+
             var newAddress = new Address
             {
-                PostalCode = partner.LegalAddress.PostalCode,
-                Area = partner.LegalAddress.Area,
-                City = partner.LegalAddress.City,
-                Street = partner.LegalAddress.Street,
-                House = partner.LegalAddress.House
+                Id = nextAddressId,
+                PostalCode = dto.LegalAddress.PostalCode,
+                Area = dto.LegalAddress.Area,
+                City = dto.LegalAddress.City,
+                Street = dto.LegalAddress.Street,
+                House = dto.LegalAddress.House
             };
             _context.Addresses.Add(newAddress);
-            await _context.SaveChangesAsync(); // Получаем Id адреса
+            await _context.SaveChangesAsync();
 
-            // Создаём партнёра
+            // Генерация следующего Id для партнёра
+            int nextPartnerId = await _context.Partners
+                .OrderByDescending(p => p.Id)
+                .Select(p => p.Id)
+                .FirstOrDefaultAsync() + 1;
+
+            // Уникальный INN
+            string uniqueInn = "INN" + Guid.NewGuid().ToString("N").Substring(0, 10);
+
             var newPartner = new Partner
             {
-                Name = partner.Name,
-                TypeId = partner.TypeId,
-                Rating = partner.Rating,
-                DirectorLastName = partner.DirectorLastName,
-                DirectorFirstName = partner.DirectorFirstName,
-                DirectorMiddleName = partner.DirectorMiddleName,
-                Phone = partner.Phone,
-                Email = partner.Email,
+                Id = nextPartnerId,
+                Name = dto.Name,
+                TypeId = dto.TypeId,
+                Rating = dto.Rating,
+                DirectorLastName = dto.DirectorLastName,
+                DirectorFirstName = dto.DirectorFirstName,
+                DirectorMiddleName = dto.DirectorMiddleName,
+                Phone = dto.Phone,
+                Email = dto.Email,
                 LegalAddressId = newAddress.Id,
-                Inn = "0000000000" // Заглушка, т.к. INN не требуется в задании
+                Inn = uniqueInn
             };
             _context.Partners.Add(newPartner);
             await _context.SaveChangesAsync();
@@ -130,7 +149,7 @@ public class PartnersController : ControllerBase
 
     // PUT: api/partners/{id}
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, [FromBody] Partner partner)
+    public async Task<IActionResult> Update(int id, [FromBody] PartnerCreateUpdateDto dto)
     {
         try
         {
@@ -141,28 +160,33 @@ public class PartnersController : ControllerBase
             if (existingPartner == null)
                 return NotFound($"Партнёр с Id = {id} не найден.");
 
-            // Валидация рейтинга
-            if (partner.Rating.HasValue && partner.Rating.Value < 0)
+            if (dto.Rating.HasValue && dto.Rating.Value < 0)
                 return BadRequest("Рейтинг не может быть отрицательным.");
 
-            // Обновляем поля партнёра
-            existingPartner.Name = partner.Name;
-            existingPartner.TypeId = partner.TypeId;
-            existingPartner.Rating = partner.Rating;
-            existingPartner.DirectorLastName = partner.DirectorLastName;
-            existingPartner.DirectorFirstName = partner.DirectorFirstName;
-            existingPartner.DirectorMiddleName = partner.DirectorMiddleName;
-            existingPartner.Phone = partner.Phone;
-            existingPartner.Email = partner.Email;
+            // Проверим, существует ли новый тип (если он меняется)
+            var typeExists = await _context.PartnerTypes.AnyAsync(t => t.Id == dto.TypeId);
+            if (!typeExists)
+                return BadRequest($"Тип с Id = {dto.TypeId} не существует.");
+
+            // Обновляем поля
+            existingPartner.Name = dto.Name;
+            existingPartner.TypeId = dto.TypeId;
+            existingPartner.Rating = dto.Rating;
+            existingPartner.DirectorLastName = dto.DirectorLastName;
+            existingPartner.DirectorFirstName = dto.DirectorFirstName;
+            existingPartner.DirectorMiddleName = dto.DirectorMiddleName;
+            existingPartner.Phone = dto.Phone;
+            existingPartner.Email = dto.Email;
+            // INN не трогаем
 
             // Обновляем адрес (если передан)
-            if (partner.LegalAddress != null)
+            if (dto.LegalAddress != null)
             {
-                existingPartner.LegalAddress.PostalCode = partner.LegalAddress.PostalCode;
-                existingPartner.LegalAddress.Area = partner.LegalAddress.Area;
-                existingPartner.LegalAddress.City = partner.LegalAddress.City;
-                existingPartner.LegalAddress.Street = partner.LegalAddress.Street;
-                existingPartner.LegalAddress.House = partner.LegalAddress.House;
+                existingPartner.LegalAddress.PostalCode = dto.LegalAddress.PostalCode;
+                existingPartner.LegalAddress.Area = dto.LegalAddress.Area;
+                existingPartner.LegalAddress.City = dto.LegalAddress.City;
+                existingPartner.LegalAddress.Street = dto.LegalAddress.Street;
+                existingPartner.LegalAddress.House = dto.LegalAddress.House;
             }
 
             await _context.SaveChangesAsync();
@@ -172,5 +196,29 @@ public class PartnersController : ControllerBase
         {
             return StatusCode(500, $"Внутренняя ошибка сервера: {ex.Message}");
         }
+
+
+    }
+    // GET: api/partners/{id}/sales
+    [HttpGet("{id}/sales")]
+    public async Task<IActionResult> GetSalesHistory(int id)
+    {
+        var partner = await _context.Partners.FindAsync(id);
+        if (partner == null)
+            return NotFound($"Партнёр с Id = {id} не найден.");
+
+        var sales = await _context.SaleHeaders
+            .Where(sh => sh.PartnerId == id)
+            .SelectMany(sh => sh.SaleItems)
+            .Select(si => new SaleHistoryDto
+            {
+                ProductName = si.ProductArticleNavigation.Name,
+                Quantity = si.Quantity,
+                SaleDate = si.Sale.SaleDate
+            })
+            .OrderByDescending(s => s.SaleDate)
+            .ToListAsync();
+
+        return Ok(sales);
     }
 }
