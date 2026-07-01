@@ -159,7 +159,7 @@ public class PartnersController : ControllerBase
             if (dto.Rating.HasValue && dto.Rating.Value < 0)
                 return BadRequest("Рейтинг не может быть отрицательным.");
 
-            // Проверим, существует ли новый тип (если он меняется)
+            // Проверак, существует ли новый тип
             var typeExists = await _context.PartnerTypes.AnyAsync(t => t.Id == dto.TypeId);
             if (!typeExists)
                 return BadRequest($"Тип с Id = {dto.TypeId} не существует.");
